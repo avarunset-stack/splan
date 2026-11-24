@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Quick Capture</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4f46e5">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Quick Capture">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+  html, body { margin:0; height:100%; background:#4f46e5; overflow:hidden; }
+  #app { position:fixed; inset:0; width:100%; height:100%; border:0; background:#fff; }
+  #msg { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center;
+         justify-content:center; gap:14px; color:#fff; font:16px/1.4 system-ui,sans-serif;
+         text-align:center; padding:24px; }
+  #msg.hide { display:none; }
+  button { font:inherit; padding:10px 20px; border:0; border-radius:10px; background:#fff; color:#4f46e5; }
+</style>
+</head>
+<body>
+<div id="msg"><div id="msgText">Loading Quick Capture…</div><button id="retry" hidden>Retry</button></div>
+<iframe id="app" title="Quick Capture"
+  allow="camera; microphone; geolocation; clipboard-read; clipboard-write; fullscreen"
+  referrerpolicy="no-referrer-when-downgrade"></iframe>
+
+<script>
+  // >>> PASTE YOUR APPS SCRIPT WEB APP URL HERE (the one ending in /exec) <<<
+  const APP_URL = "PASTE_YOUR_EXEC_URL_HERE";
+
+  const frame = document.getElementById("app");
+  const msg = document.getElementById("msg");
+  const msgText = document.getElementById("msgText");
+  const retry = document.getElementById("retry");
+  let loaded = false;
+
+  function load() {
+    loaded = false;
+    retry.hidden = true;
+    msg.classList.remove("hide");
+    msgText.textContent = "Loading Quick Capture…";
+    if (!navigator.onLine) return fail();
+    frame.src = APP_URL;
+    setTimeout(() => { if (!loaded) fail(); }, 20000);
+  }
+  function fail() {
+    msgText.textContent = "Can't reach Quick Capture. Check your connection.";
+    retry.hidden = false;
+  }
+  frame.addEventListener("load", () => { loaded = true; msg.classList.add("hide"); });
+  retry.addEventListener("click", load);
+  window.addEventListener("online", load);
+
+  load();
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => navigator.serviceWorker.register("sw.js"));
+  }
+</script>
+</body>
+</html>
